@@ -20,8 +20,6 @@ interface Customer{
     name: string;
 }
 
-
-
 interface OrderItem{
     skuID: string;
     sku: SKU;
