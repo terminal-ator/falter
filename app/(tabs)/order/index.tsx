@@ -1,19 +1,29 @@
-import { Customers, ICustomer } from '@/data/fakedata';
+import { ICustomer } from '@/data/fakedata';
 import { useStore } from '@/stores';
-import { useRouter } from "expo-router";
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { deNormalizeArray } from '@/stores/data';
+import { useNavigation, useRouter } from "expo-router";
+import { useEffect } from 'react';
+import { Alert, Button, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
 export default function CustomerFlowIndex() {
     const router = useRouter();
-    const { selectCustomer, selectedCustomerID, customers, clearCart } = useStore();
+    const navigation = useNavigation()
+    const { selectCustomer, selectedCustomerID, customers, clearCart, syncCustomers } = useStore();
 
 
+    useEffect(()=>{
+        navigation.setOptions({
+            headerRight: ()=>(
+                <Button title= 'Refresh' onPress={async ()=>{ await syncCustomers(); }} />
+            )
+        })
+    },[navigation])
 
     const renderCustomer = ({ item }: { item: ICustomer }) => {
         return (
-            <View style={styles.productCard}>
-                <TouchableOpacity onPress={() => {
+            
+                <TouchableOpacity style={styles.productCard} onPress={() => {
                     if (selectedCustomerID && selectedCustomerID !== item.id) {
                         Alert.alert(
                             "Customer Selection",
@@ -21,28 +31,30 @@ export default function CustomerFlowIndex() {
                             [
                                 { text: "Cancel", style: "cancel" },
                                 {
-                                    text: "Change Customer", onPress: () => {
-                                        selectCustomer(item.id);
+                                    text: "Change Customer", onPress: () => {``
+                                        selectCustomer(item.id as number);
                                         clearCart();
-                                        router.push(`./${item.id}`);
+                                        router.push(`/order/${item.id}`);
                                     }
                                 }
                             ]
                         );
                     } else {
-                        selectCustomer(item.id);
-                        router.push(`./${item.id}`)
+                        selectCustomer(item.id as number);
+                        clearCart()
+                        router.push(`/order/${item.id}`)
                     }
                 }}>
                     <Text style={styles.productName}>{item.name}</Text>
                 </TouchableOpacity>
-            </View>
+          
         )
     }
 
     return (
         <View style={styles.container}>
-            <FlatList data={Customers}
+            
+            <FlatList data={deNormalizeArray(customers)}
                 renderItem={renderCustomer}
                 keyExtractor={(item) => item.id.toString()}
             />

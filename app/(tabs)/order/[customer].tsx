@@ -1,5 +1,6 @@
 
-import { Customers, ICustomer } from '@/data/fakedata';
+import { ICustomer } from '@/data/fakedata';
+import { useStore } from '@/stores';
 import { useRoute } from '@react-navigation/native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -11,7 +12,7 @@ export default function CustomerDetail() {
     const { customer } = route.params || {};
 
     const [selectedCustomer, setSelectedCustomer] = useState<ICustomer | null>(null);
-   
+    const { customers  }  = useStore()
 
 
     const handleStartOrder = () => {
@@ -35,7 +36,7 @@ export default function CustomerDetail() {
     useFocusEffect(
         useCallback(()=>{
         if(customer){
-            const extractCustomer = Customers.find(c=>c.id === Number(customer));
+            const extractCustomer = customers[customer as number];
             console.log('Extracted Customer:', extractCustomer);
             if(extractCustomer){
                 setSelectedCustomer(extractCustomer);

@@ -2,6 +2,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { ThemedView } from '@/components/themed-view';
 import { useStore } from '@/stores';
+import { Link } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -30,7 +31,9 @@ export default function TabTwoScreen() {
           if(!order) return null;
           return(
             <View>
-              <Text>Order ID: {order.orderID}</Text>
+              <Link href={`/orders/order/${order.orderID}`}>
+                <Text>{order.customer.name} Rs:{order.totalAmount}</Text>
+              </Link>
             </View>
           )
         }} />

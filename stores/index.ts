@@ -1,5 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { Beats, Customers, normalizeArray } from './data';
 
 interface CartItem {
     skuID: string;
@@ -18,6 +21,7 @@ interface SKU{
 interface Customer{
     id: number;
     name: string;
+    beat: string;
 }
 
 interface OrderItem{
@@ -37,9 +41,12 @@ interface Order{
 interface StoreState{
     skus: Record<string, SKU>;
     customers: Record<number, Customer>;
+    beats: string[];
     cart: Record<string, CartItem>;
     selectedCustomerID?: number;
     orders: Record<string, Order>;
+    editOrderID: string;
+    syncCustomers: ()=> Promise<void>;
     addToCart: (sku: SKU, quantity: number) => void;
     removeFromCart: (skuID: string) => void;
     updateQuantity: (skuID: string, quantity: number) => void;
@@ -50,8 +57,12 @@ interface StoreState{
     saveOrder: ()=>void
 }
 
-export const useStore = create<StoreState>((set) => ({
+export const useStore = create<StoreState>()(
+    persist(
+    (set) => ({
+    editOrderID: '',
     orders:{},
+    beats: Beats,
     skus: {
         "DM10": { skuID: "DM10", name: "Dairy Milk Rs.10 56pcs", price: 509.09, mrp: 560, unit: "56pcs" },
         "DM20": { skuID: "DM20", name: "Dairy Milk Rs.20 40pcs", price: 714.09, mrp: 800, unit: "40pcs" },
@@ -72,9 +83,11 @@ export const useStore = create<StoreState>((set) => ({
                 unit: "500ml"
             }
     },
-    customers: {
-        1: { id: 1, name: "Jai Bhawani Kirana Store" },
-        2: { id: 2, name: "Sanket Super Market" }
+    customers: normalizeArray(Customers),
+    syncCustomers: async ()=> {
+        // In real scenario, fetch from server
+        const fetchedCustomers = Customers;
+        set({ customers: normalizeArray(fetchedCustomers) });
     },
     cart: {},
     selectedCustomerID: undefined,
@@ -112,7 +125,10 @@ export const useStore = create<StoreState>((set) => ({
         if(!state.selectedCustomerID){
             return {};
         }
-        const orderID = Crypto.randomUUID();
+        let orderID = Crypto.randomUUID();
+        if(state.editOrderID!==''){
+            orderID = state.editOrderID;
+        }
         const order: Order = {
             orderID,
             customerID: state.selectedCustomerID,
@@ -130,8 +146,12 @@ export const useStore = create<StoreState>((set) => ({
                 [orderID]: order
             },
             cart: {},
-            selectedCustomerID: undefined
+            selectedCustomerID: undefined,
+            editOrderID: ''
         }
     }),
 
+}),{
+    name: 'store-storage',
+    storage: createJSONStorage(() => AsyncStorage),
 }));

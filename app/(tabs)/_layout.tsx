@@ -17,14 +17,14 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
-        name="(customerflow)"
+        name="order"
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="orders"
         options={{
           title: 'Orders',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="note.text" color={color} />,

@@ -1,6 +1,7 @@
 export interface ICustomer{
-    id: number;
+    id: number | string;
     name: string;
+    beat: string;
 }
 
 export type IProduct = typeof Products[0];

@@ -9,7 +9,7 @@ export default function ProductsScreen() {
     const renderProduct = ({ item }: { item: typeof Products[0] }) => (
         <View style={styles.productCard}>
             <TouchableOpacity onPress={()=>{
-                router.push(`product/${item.id}`)
+                router.push(`./product/${item.id}`)
             }}>
             <Text style={styles.productName}>{item.name}</Text>
             
